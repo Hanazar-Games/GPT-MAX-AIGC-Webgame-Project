@@ -25,6 +25,9 @@ jobs:
       - name: Run static repository checks
         run: python3 tools/verify_static.py
 
+      - name: Smoke-test static serving
+        run: python3 tools/smoke_http.py
+
       - name: Verify JavaScript
         run: npm run lint
 

@@ -18,11 +18,12 @@ If Node/npm is installed, `npm start` runs the same static server command.
 
 ```sh
 python3 tools/verify_static.py
+python3 tools/smoke_http.py
 npm run lint
 npm test
 ```
 
-The static verification script only needs Python. The JavaScript checks use Node 22 in CI.
+The static and HTTP verification scripts only need Python. The JavaScript checks use Node 22 in CI.
 
 ## Controls
 
@@ -40,4 +41,5 @@ The static verification script only needs Python. The JavaScript checks use Node
 - `sw.js` caches the app shell for offline play after first load.
 - `tests/gameplay.test.mjs` covers collision, scoring, pulse, and win logic.
 - `tools/verify_static.py` checks static wiring without Node.
+- `tools/smoke_http.py` verifies the app shell through a local HTTP server.
 - `.github/workflows/ci.yml` runs verification and publishes GitHub Pages.
