@@ -4,6 +4,7 @@ import {
   ARENA,
   activatePulse,
   clamp,
+  createDailySeed,
   createMission,
   createGameState,
   distanceSq,
@@ -27,6 +28,28 @@ test("clamp limits values inclusively", () => {
 
 test("distanceSq returns squared distance", () => {
   assert.equal(distanceSq({ x: 0, y: 0 }, { x: 3, y: 4 }), 25);
+});
+
+test("daily seed is stable for the same calendar route", () => {
+  const first = createDailySeed("2026-05-14");
+  const second = createDailySeed("2026-05-14");
+  const next = createDailySeed("2026-05-15");
+
+  assert.equal(first.code, "20260514");
+  assert.equal(first.seed, second.seed);
+  assert.notEqual(first.seed, next.seed);
+});
+
+test("daily route uses the daily seed and code", () => {
+  const daily = createDailySeed("2026-05-14");
+  const state = createGameState({
+    route: "daily",
+    date: "2026-05-14"
+  });
+
+  assert.equal(state.route, "daily");
+  assert.equal(state.routeCode, daily.code);
+  assert.equal(state.seed, daily.seed);
 });
 
 test("collecting a shard increases score, combo, and overdrive", () => {

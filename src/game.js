@@ -1,12 +1,13 @@
 import {
   ARENA,
+  createDailySeed,
   createGameState,
   pauseState,
   startState,
   updateGame
 } from "./core.js";
 
-const storageKey = "lumen-drift-best";
+const storagePrefix = "lumen-drift-best";
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 const els = {
@@ -14,6 +15,7 @@ const els = {
   shield: document.querySelector("#shield-value"),
   time: document.querySelector("#time-value"),
   wave: document.querySelector("#wave-value"),
+  route: document.querySelector("#route-value"),
   combo: document.querySelector("#combo-value"),
   best: document.querySelector("#best-value"),
   shards: document.querySelector("#shards-value"),
@@ -31,6 +33,7 @@ const els = {
   overlayTitle: document.querySelector("#overlay-title"),
   overlayDetail: document.querySelector("#overlay-detail"),
   difficulty: document.querySelector("#difficulty-select"),
+  routeSelect: document.querySelector("#route-select"),
   start: document.querySelector("#start-button"),
   pause: document.querySelector("#pause-button"),
   pulse: document.querySelector("#pulse-button"),
@@ -90,6 +93,13 @@ els.difficulty.addEventListener("change", () => {
   }
 });
 
+els.routeSelect.addEventListener("change", () => {
+  if (state.status !== "playing") {
+    state = makeState();
+    syncHud(true);
+  }
+});
+
 window.addEventListener("keydown", (event) => {
   if (event.repeat) {
     return;
@@ -140,9 +150,16 @@ canvas.addEventListener("pointercancel", () => {
 });
 
 function makeState() {
-  const best = Number(localStorage.getItem(storageKey) ?? "0") || 0;
+  const daily = createDailySeed();
+  const route = els.routeSelect.value;
+  const routeCode = route === "daily" ? daily.code : "RUN";
+  const best =
+    Number(localStorage.getItem(bestKey(els.difficulty.value, routeCode)) ?? "0") || 0;
   const next = createGameState({
     difficulty: els.difficulty.value,
+    route,
+    routeCode,
+    seed: route === "daily" ? daily.seed : undefined,
     best
   });
   lastStatus = next.status;
@@ -158,8 +175,10 @@ function frame(now) {
   inputQueue.dash = false;
   inputQueue.pulse = false;
 
-  if (state.best > Number(localStorage.getItem(storageKey) ?? "0")) {
-    localStorage.setItem(storageKey, String(state.best));
+  const currentBest =
+    Number(localStorage.getItem(bestKey(state.difficulty, state.routeCode)) ?? "0");
+  if (state.best > currentBest) {
+    localStorage.setItem(bestKey(state.difficulty, state.routeCode), String(state.best));
   }
 
   if (state.status !== lastStatus) {
@@ -223,6 +242,7 @@ function syncHud(force = false) {
   els.shield.textContent = String(Math.ceil(state.shield));
   els.time.textContent = String(remaining);
   els.wave.textContent = String(state.wave);
+  els.route.textContent = state.routeCode;
   els.combo.textContent = `${state.combo.toFixed(1)}x`;
   els.best.textContent = formatNumber(state.best);
   els.shards.textContent = String(state.stats.shards);
@@ -238,6 +258,7 @@ function syncHud(force = false) {
   els.pause.disabled = state.status === "ready" || state.status === "lost" || state.status === "won";
   els.start.disabled = state.status === "playing";
   els.difficulty.disabled = state.status === "playing";
+  els.routeSelect.disabled = state.status === "playing";
 
   renderOverlay();
 
@@ -253,8 +274,9 @@ function renderOverlay() {
 
   if (state.status === "ready") {
     els.overlayKicker.textContent = "Ready";
-    els.overlayTitle.textContent = "Lumen Drift";
-    els.overlayDetail.textContent = "Signal route awaiting launch.";
+    els.overlayTitle.textContent = state.route === "daily" ? state.routeCode : "Lumen Drift";
+    els.overlayDetail.textContent =
+      state.route === "daily" ? "Daily route awaiting launch." : "Signal route awaiting launch.";
   } else if (state.status === "paused") {
     els.overlayKicker.textContent = "Paused";
     els.overlayTitle.textContent = "Signal Held";
@@ -268,6 +290,10 @@ function renderOverlay() {
     els.overlayTitle.textContent = formatNumber(state.score);
     els.overlayDetail.textContent = "Signal route collapsed.";
   }
+}
+
+function bestKey(difficulty, routeCode) {
+  return `${storagePrefix}:${difficulty}:${routeCode}`;
 }
 
 function drawScene(time) {

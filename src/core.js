@@ -82,15 +82,42 @@ export function createRng(seed = Date.now()) {
   };
 }
 
+export function createDailySeed(date = new Date()) {
+  const day =
+    typeof date === "string"
+      ? date
+      : [
+          date.getFullYear(),
+          String(date.getMonth() + 1).padStart(2, "0"),
+          String(date.getDate()).padStart(2, "0")
+        ].join("-");
+  let hash = 2166136261;
+
+  for (const char of `lumen-drift:${day}`) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return {
+    code: day.replaceAll("-", ""),
+    seed: hash >>> 0
+  };
+}
+
 export function createGameState(options = {}) {
   const difficulty = DIFFICULTIES[options.difficulty]
     ? options.difficulty
     : "standard";
-  const seed = options.seed ?? Math.floor(Math.random() * 4294967295);
+  const route = options.route === "daily" ? "daily" : "run";
+  const daily = route === "daily" ? createDailySeed(options.date) : null;
+  const seed =
+    options.seed ?? daily?.seed ?? Math.floor(Math.random() * 4294967295);
 
   const state = {
     status: "ready",
     difficulty,
+    route,
+    routeCode: options.routeCode ?? daily?.code ?? "RUN",
     seed,
     rng: createRng(seed),
     elapsed: 0,

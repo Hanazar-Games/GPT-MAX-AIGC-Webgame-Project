@@ -38,6 +38,10 @@
             <span class="label">Wave</span>
             <strong id="wave-value">1</strong>
           </div>
+          <div class="hud-readout">
+            <span class="label">Route</span>
+            <strong id="route-value">Run</strong>
+          </div>
         </div>
 
         <div class="controls">
@@ -47,6 +51,13 @@
               <option value="soft">Soft</option>
               <option value="standard" selected>Standard</option>
               <option value="eclipse">Eclipse</option>
+            </select>
+          </label>
+          <label class="select-wrap" for="route-select">
+            <span>Route</span>
+            <select id="route-select">
+              <option value="run" selected>Run</option>
+              <option value="daily">Daily</option>
             </select>
           </label>
           <button id="start-button" type="button">Start</button>
