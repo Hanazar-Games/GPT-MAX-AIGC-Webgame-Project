@@ -8,6 +8,7 @@ import {
 } from "./core.js";
 
 const storagePrefix = "lumen-drift-best";
+const recordsKey = "lumen-drift-records";
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 const els = {
@@ -30,6 +31,7 @@ const els = {
   missionMeter: document.querySelector("#mission-meter"),
   missionMeterLabel: document.querySelector("#mission-meter-label"),
   eventLog: document.querySelector("#event-log"),
+  recordList: document.querySelector("#record-list"),
   overlay: document.querySelector("#stage-overlay"),
   overlayKicker: document.querySelector("#overlay-kicker"),
   overlayTitle: document.querySelector("#overlay-title"),
@@ -59,6 +61,8 @@ let state = makeState();
 let lastFrame = performance.now();
 let lastStatus = state.status;
 let statusRender = "";
+let recordsRender = "";
+let runRecords = readRunRecords();
 
 resizeCanvas();
 syncHud(true);
@@ -250,9 +254,11 @@ function collectInput() {
 
 function handleStatusChange() {
   if (state.status === "won") {
+    saveRunRecord(state);
     playTone(523, 0.16, "triangle");
     setTimeout(() => playTone(659, 0.18, "triangle"), 90);
   } else if (state.status === "lost") {
+    saveRunRecord(state);
     playTone(130, 0.22, "sawtooth");
   }
 }
@@ -311,6 +317,8 @@ function syncHud(force = false) {
     els.eventLog.innerHTML = state.eventLog.map((item) => `<li>${item}</li>`).join("");
     statusRender = nextLog;
   }
+
+  renderRecords(force);
 }
 
 function renderOverlay() {
@@ -571,6 +579,60 @@ function playTone(frequency, duration, type = "sine") {
 
 function formatNumber(value) {
   return new Intl.NumberFormat("en-US").format(Math.round(value));
+}
+
+function saveRunRecord(runState) {
+  runRecords.unshift({
+    status: runState.status,
+    score: Math.round(runState.score),
+    routeCode: runState.routeCode,
+    difficulty: runState.difficulty,
+    wave: runState.wave,
+    shards: runState.stats.shards,
+    gates: runState.stats.gates,
+    grazes: runState.stats.grazes,
+    breaks: runState.stats.hazardsBroken,
+    date: new Date().toISOString()
+  });
+  runRecords = runRecords.slice(0, 5);
+  localStorage.setItem(recordsKey, JSON.stringify(runRecords));
+  renderRecords(true);
+}
+
+function readRunRecords() {
+  try {
+    const value = JSON.parse(localStorage.getItem(recordsKey) ?? "[]");
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
+function renderRecords(force = false) {
+  const nextRender = JSON.stringify(runRecords);
+  if (!force && nextRender === recordsRender) {
+    return;
+  }
+
+  if (runRecords.length === 0) {
+    els.recordList.innerHTML = "<li>No runs yet</li>";
+  } else {
+    els.recordList.innerHTML = runRecords
+      .map((record) => {
+        const result = record.status === "won" ? "Clear" : "Lost";
+        const route = record.routeCode === "RUN" ? "Run" : record.routeCode;
+        return [
+          "<li>",
+          `<strong>${formatNumber(record.score)}</strong>`,
+          `<span>${result} / ${route} / ${record.difficulty}</span>`,
+          `<em>W${record.wave} S${record.shards} G${record.gates} R${record.grazes}</em>`,
+          "</li>"
+        ].join("");
+      })
+      .join("");
+  }
+
+  recordsRender = nextRender;
 }
 
 function withAlpha(hex, alpha) {

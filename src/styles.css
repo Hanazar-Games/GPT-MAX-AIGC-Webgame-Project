@@ -126,6 +126,7 @@ select {
 .telemetry-grid > div,
 .meter-block,
 .mission-panel,
+.record-panel,
 .event-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -286,7 +287,8 @@ select {
   gap: 4px;
 }
 
-.event-panel {
+.event-panel,
+.record-panel {
   min-height: 154px;
   padding: 12px;
 }
@@ -302,7 +304,8 @@ select {
   font-size: 1.05rem;
 }
 
-.event-panel ol {
+.event-panel ol,
+.record-panel ol {
   list-style: none;
   display: grid;
   gap: 7px;
@@ -310,12 +313,32 @@ select {
   padding: 0;
 }
 
-.event-panel li {
+.event-panel li,
+.record-panel li {
   min-height: 26px;
   padding: 5px 8px;
   border-left: 3px solid var(--teal);
   background: rgba(42, 166, 161, 0.08);
   color: #ded8cb;
+}
+
+.record-panel li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 8px;
+}
+
+.record-panel strong {
+  grid-row: span 2;
+  color: var(--amber);
+}
+
+.record-panel span,
+.record-panel em {
+  min-width: 0;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.82rem;
 }
 
 @media (max-width: 1080px) {
@@ -336,6 +359,7 @@ select {
   }
 
   .event-panel,
+  .record-panel,
   .mission-panel {
     grid-column: 1 / -1;
   }
