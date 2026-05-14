@@ -54,6 +54,7 @@ let statusRender = "";
 resizeCanvas();
 syncHud(true);
 drawScene(0);
+registerServiceWorker();
 requestAnimationFrame(frame);
 
 els.start.addEventListener("click", () => {
@@ -502,4 +503,14 @@ function withAlpha(hex, alpha) {
   const g = Number.parseInt(value.slice(2, 4), 16);
   const b = Number.parseInt(value.slice(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator) || location.protocol === "file:") {
+    return;
+  }
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
 }

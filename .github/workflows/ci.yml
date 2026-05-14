@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Run static repository checks
+        run: python3 tools/verify_static.py
+
       - name: Verify JavaScript
         run: npm run lint
 

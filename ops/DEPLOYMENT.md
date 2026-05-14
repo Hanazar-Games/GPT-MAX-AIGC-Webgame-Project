@@ -13,6 +13,7 @@ The local server defaults to `http://localhost:4173`.
 On machines with Node/npm available:
 
 ```sh
+npm run verify:static
 npm run lint
 npm test
 npm start
@@ -26,8 +27,9 @@ Repository Pages should be configured to use **GitHub Actions** as its source.
 
 ## Release Checklist
 
-1. Run `npm run lint`.
-2. Run `npm test`.
-3. Start the local server and verify the canvas renders.
-4. Commit with the project commit name.
-5. Push `main` and let the `ci` workflow publish Pages.
+1. Run `python3 tools/verify_static.py`.
+2. Run `npm run lint`.
+3. Run `npm test`.
+4. Start the local server and verify the canvas renders.
+5. Commit with the project commit name.
+6. Push `main` and let the `ci` workflow publish Pages.
