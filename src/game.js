@@ -5,6 +5,7 @@ import {
   createRunSummary,
   createShareCode,
   pauseState,
+  parseShareCode,
   startState,
   updateGame
 } from "./core.js";
@@ -34,6 +35,8 @@ const els = {
   missionMeterLabel: document.querySelector("#mission-meter-label"),
   eventLog: document.querySelector("#event-log"),
   recordList: document.querySelector("#record-list"),
+  shareInput: document.querySelector("#share-input"),
+  shareResult: document.querySelector("#share-result"),
   overlay: document.querySelector("#stage-overlay"),
   overlayKicker: document.querySelector("#overlay-kicker"),
   overlayTitle: document.querySelector("#overlay-title"),
@@ -44,6 +47,7 @@ const els = {
   pause: document.querySelector("#pause-button"),
   pulse: document.querySelector("#pulse-button"),
   copy: document.querySelector("#copy-button"),
+  decode: document.querySelector("#decode-button"),
   reset: document.querySelector("#reset-button")
 };
 
@@ -93,6 +97,16 @@ els.pulse.addEventListener("click", () => {
 
 els.copy.addEventListener("click", () => {
   copyShareCode();
+});
+
+els.decode.addEventListener("click", () => {
+  decodeShareCode();
+});
+
+els.shareInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    decodeShareCode();
+  }
 });
 
 els.reset.addEventListener("click", () => {
@@ -617,6 +631,24 @@ function copyShareCode() {
   } else {
     pushCopyEvent("Share ready");
   }
+}
+
+function decodeShareCode() {
+  const summary = parseShareCode(els.shareInput.value);
+  if (!summary) {
+    els.shareResult.textContent = "Invalid result code";
+    return;
+  }
+
+  const result = summary.status === "won" ? "Clear" : "Lost";
+  const route = summary.routeCode === "RUN" ? "Run" : summary.routeCode;
+  els.shareResult.textContent = [
+    `${result} / ${route} / ${summary.difficulty}`,
+    `${formatNumber(summary.score)} pts`,
+    `W${summary.wave}`,
+    `H${summary.shield}`,
+    `X${summary.maxCombo}`
+  ].join(" / ");
 }
 
 function pushCopyEvent(message) {

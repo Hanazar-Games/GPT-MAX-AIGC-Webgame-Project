@@ -10,6 +10,7 @@ import {
   createMission,
   createGameState,
   distanceSq,
+  parseShareCode,
   startState,
   updateGame
 } from "../src/core.js";
@@ -92,6 +93,9 @@ test("run summaries produce compact deterministic share codes", () => {
     createShareCode(summary),
     "LD|CLEAR|20260514|ECL|1234|W6|H88|S12|G3|R5|B2|M4|X2.3"
   );
+  assert.deepEqual(parseShareCode(createShareCode(summary)), summary);
+  assert.equal(parseShareCode("LD|CLEAR|bad"), null);
+  assert.equal(parseShareCode("LD|CLEAR|RUN|NOPE|1234|W6|H88|S12|G3|R5|B2|M4|X2.3"), null);
 });
 
 test("collecting a shard increases score, combo, and overdrive", () => {

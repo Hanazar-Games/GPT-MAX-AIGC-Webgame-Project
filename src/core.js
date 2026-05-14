@@ -153,6 +153,71 @@ export function createShareCode(summary) {
   ].join("|");
 }
 
+export function parseShareCode(code) {
+  const parts = String(code ?? "")
+    .trim()
+    .toUpperCase()
+    .split("|")
+    .map((part) => part.trim());
+  if (parts.length !== 13 || parts[0] !== "LD") {
+    return null;
+  }
+
+  const status = {
+    CLEAR: "won",
+    LOST: "lost"
+  }[parts[1]];
+  const difficulty = {
+    SOFT: "soft",
+    STD: "standard",
+    ECL: "eclipse"
+  }[parts[3]];
+  const routeCode = parts[2];
+  if (!status || !difficulty || !/^[A-Z0-9]{3,12}$/.test(routeCode)) {
+    return null;
+  }
+
+  const summary = {
+    status,
+    routeCode,
+    difficulty,
+    score: parseShareNumber(parts[4]),
+    wave: parseTaggedShareNumber(parts[5], "W"),
+    shield: parseTaggedShareNumber(parts[6], "H"),
+    shards: parseTaggedShareNumber(parts[7], "S"),
+    gates: parseTaggedShareNumber(parts[8], "G"),
+    grazes: parseTaggedShareNumber(parts[9], "R"),
+    breaks: parseTaggedShareNumber(parts[10], "B"),
+    missions: parseTaggedShareNumber(parts[11], "M"),
+    maxCombo: parseTaggedShareNumber(parts[12], "X", true)
+  };
+
+  return Object.values(summary).every((value) => value !== null) ? summary : null;
+}
+
+function parseTaggedShareNumber(value, prefix, allowDecimal = false) {
+  if (!value.startsWith(prefix)) {
+    return null;
+  }
+  return parseShareNumber(value.slice(prefix.length), allowDecimal);
+}
+
+function parseShareNumber(value, allowDecimal = false) {
+  const pattern = allowDecimal ? /^\d+(?:\.\d+)?$/ : /^\d+$/;
+  if (!pattern.test(value)) {
+    return null;
+  }
+
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) {
+    return null;
+  }
+  if (!allowDecimal && !Number.isSafeInteger(number)) {
+    return null;
+  }
+  return number;
+}
+
 export function createGameState(options = {}) {
   const difficulty = DIFFICULTIES[options.difficulty]
     ? options.difficulty

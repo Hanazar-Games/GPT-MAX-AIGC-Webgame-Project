@@ -151,6 +151,21 @@
             <span class="label">Recent Runs</span>
             <ol id="record-list" aria-live="polite"></ol>
           </div>
+
+          <div class="share-panel">
+            <label class="label" for="share-input">Result Code</label>
+            <div class="share-row">
+              <input
+                id="share-input"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                inputmode="text"
+              />
+              <button id="decode-button" type="button">Decode</button>
+            </div>
+            <p id="share-result" aria-live="polite">No code loaded</p>
+          </div>
         </aside>
       </section>
     </main>

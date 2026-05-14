@@ -13,6 +13,7 @@ Lumen Drift is a compact survival arcade game where the player keeps a signal ro
 - Pulse to clear nearby static hazards when overdrive is full.
 - Complete rotating objectives for route rewards.
 - Copy a compact result code after each completed or failed route.
+- Decode a compact result code to inspect another run.
 
 ## Modes
 
@@ -40,8 +41,8 @@ Score is intentionally layered:
 
 ## Near-Term Roadmap
 
-- Add share-code decoding for result inspection.
 - Add optional low-intensity visual mode.
 - Add a richer end-of-run breakdown.
+- Add result-code deep links for direct run inspection.
 - Add browser-level visual regression checks once a reliable browser runner is available in the environment.
 - Push to GitHub Pages once GitHub credentials are available on this machine.
