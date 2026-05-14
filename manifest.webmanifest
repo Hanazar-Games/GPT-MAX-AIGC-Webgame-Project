@@ -1,0 +1,16 @@
+{
+  "name": "Lumen Drift",
+  "short_name": "Lumen Drift",
+  "description": "A compact canvas arcade game by hanazarochikawa.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#11110f",
+  "theme_color": "#11110f",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

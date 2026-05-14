@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lumen Drift</title>
+    <meta
+      name="description"
+      content="Lumen Drift is a compact canvas arcade game built for the GPT-MAX-AIGC-Webgame-Project repository."
+    >
+    <meta name="theme-color" content="#11110f">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="src/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar" aria-label="Mission controls">
+        <div class="identity">
+          <p class="kicker">hanazarochikawa</p>
+          <h1>Lumen Drift</h1>
+        </div>
+
+        <div class="hud-strip" aria-label="Live game stats">
+          <div class="hud-readout">
+            <span class="label">Score</span>
+            <strong id="score-value">0</strong>
+          </div>
+          <div class="hud-readout">
+            <span class="label">Shield</span>
+            <strong id="shield-value">100</strong>
+          </div>
+          <div class="hud-readout">
+            <span class="label">Time</span>
+            <strong id="time-value">90</strong>
+          </div>
+          <div class="hud-readout">
+            <span class="label">Wave</span>
+            <strong id="wave-value">1</strong>
+          </div>
+        </div>
+
+        <div class="controls">
+          <label class="select-wrap" for="difficulty-select">
+            <span>Mode</span>
+            <select id="difficulty-select">
+              <option value="soft">Soft</option>
+              <option value="standard" selected>Standard</option>
+              <option value="eclipse">Eclipse</option>
+            </select>
+          </label>
+          <button id="start-button" type="button">Start</button>
+          <button id="pause-button" type="button">Pause</button>
+          <button id="pulse-button" type="button">Pulse</button>
+          <button id="reset-button" type="button">Reset</button>
+        </div>
+      </header>
+
+      <section class="play-layout" aria-label="Lumen Drift game">
+        <div class="stage-wrap">
+          <canvas
+            id="game-canvas"
+            width="1000"
+            height="640"
+            aria-label="Lumen Drift playfield"
+          ></canvas>
+          <div class="stage-overlay" id="stage-overlay">
+            <p id="overlay-kicker">Ready</p>
+            <strong id="overlay-title">Lumen Drift</strong>
+            <span id="overlay-detail">Signal route awaiting launch.</span>
+          </div>
+        </div>
+
+        <aside class="telemetry" aria-label="Telemetry">
+          <div class="meter-block">
+            <div class="meter-head">
+              <span>Shield</span>
+              <strong id="shield-meter-label">100%</strong>
+            </div>
+            <div class="meter">
+              <span id="shield-meter"></span>
+            </div>
+          </div>
+
+          <div class="meter-block">
+            <div class="meter-head">
+              <span>Overdrive</span>
+              <strong id="overdrive-meter-label">0%</strong>
+            </div>
+            <div class="meter overdrive">
+              <span id="overdrive-meter"></span>
+            </div>
+          </div>
+
+          <div class="telemetry-grid">
+            <div>
+              <span class="label">Combo</span>
+              <strong id="combo-value">1.0x</strong>
+            </div>
+            <div>
+              <span class="label">Best</span>
+              <strong id="best-value">0</strong>
+            </div>
+            <div>
+              <span class="label">Shards</span>
+              <strong id="shards-value">0</strong>
+            </div>
+            <div>
+              <span class="label">Breaks</span>
+              <strong id="breaks-value">0</strong>
+            </div>
+          </div>
+
+          <div class="event-panel">
+            <span class="label">Signal Log</span>
+            <ol id="event-log" aria-live="polite"></ol>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="src/game.js"></script>
+  </body>
+</html>
