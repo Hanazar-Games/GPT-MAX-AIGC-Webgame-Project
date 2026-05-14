@@ -54,6 +54,7 @@ const inputQueue = {
 };
 
 let audio = null;
+applyInitialSettings();
 let state = makeState();
 let lastFrame = performance.now();
 let lastStatus = state.status;
@@ -91,6 +92,7 @@ els.reset.addEventListener("click", () => {
 els.difficulty.addEventListener("change", () => {
   if (state.status !== "playing") {
     state = makeState();
+    syncUrlSettings();
     syncHud(true);
   }
 });
@@ -98,6 +100,7 @@ els.difficulty.addEventListener("change", () => {
 els.routeSelect.addEventListener("change", () => {
   if (state.status !== "playing") {
     state = makeState();
+    syncUrlSettings();
     syncHud(true);
   }
 });
@@ -166,6 +169,43 @@ function makeState() {
   });
   lastStatus = next.status;
   return next;
+}
+
+function applyInitialSettings() {
+  const params = new URLSearchParams(location.search);
+  setSelectValue(els.difficulty, params.get("mode"));
+  setSelectValue(els.routeSelect, params.get("route"));
+}
+
+function setSelectValue(select, value) {
+  if (!value) {
+    return;
+  }
+
+  const allowed = Array.from(select.options).some((option) => option.value === value);
+  if (allowed) {
+    select.value = value;
+  }
+}
+
+function syncUrlSettings() {
+  const params = new URLSearchParams(location.search);
+
+  if (els.difficulty.value === "standard") {
+    params.delete("mode");
+  } else {
+    params.set("mode", els.difficulty.value);
+  }
+
+  if (els.routeSelect.value === "run") {
+    params.delete("route");
+  } else {
+    params.set("route", els.routeSelect.value);
+  }
+
+  const query = params.toString();
+  const nextUrl = `${location.pathname}${query ? `?${query}` : ""}${location.hash}`;
+  history.replaceState(null, "", nextUrl);
 }
 
 function frame(now) {

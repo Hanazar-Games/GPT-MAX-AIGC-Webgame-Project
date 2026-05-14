@@ -12,6 +12,8 @@ python3 -m http.server 4173
 
 Open `http://localhost:4173`.
 
+Daily routes and difficulty can be opened directly with query params, for example `http://localhost:4173/?route=daily&mode=eclipse`.
+
 If Node/npm is installed, `npm start` runs the same static server command.
 
 ## Test
