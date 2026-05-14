@@ -2,6 +2,8 @@ import {
   ARENA,
   createDailySeed,
   createGameState,
+  createRunSummary,
+  createShareCode,
   pauseState,
   startState,
   updateGame
@@ -41,6 +43,7 @@ const els = {
   start: document.querySelector("#start-button"),
   pause: document.querySelector("#pause-button"),
   pulse: document.querySelector("#pulse-button"),
+  copy: document.querySelector("#copy-button"),
   reset: document.querySelector("#reset-button")
 };
 
@@ -86,6 +89,10 @@ els.pause.addEventListener("click", () => {
 
 els.pulse.addEventListener("click", () => {
   inputQueue.pulse = true;
+});
+
+els.copy.addEventListener("click", () => {
+  copyShareCode();
 });
 
 els.reset.addEventListener("click", () => {
@@ -307,6 +314,7 @@ function syncHud(force = false) {
   els.pulse.disabled = state.overdrive < 100 || state.status !== "playing";
   els.pause.disabled = state.status === "ready" || state.status === "lost" || state.status === "won";
   els.start.disabled = state.status === "playing";
+  els.copy.disabled = state.status !== "won" && state.status !== "lost";
   els.difficulty.disabled = state.status === "playing";
   els.routeSelect.disabled = state.status === "playing";
 
@@ -334,13 +342,15 @@ function renderOverlay() {
     els.overlayTitle.textContent = "Signal Held";
     els.overlayDetail.textContent = "The route is suspended.";
   } else if (state.status === "won") {
+    const summary = createRunSummary(state);
     els.overlayKicker.textContent = "Complete";
     els.overlayTitle.textContent = formatNumber(state.score);
-    els.overlayDetail.textContent = "Signal route stabilized.";
+    els.overlayDetail.textContent = createShareCode(summary);
   } else if (state.status === "lost") {
+    const summary = createRunSummary(state);
     els.overlayKicker.textContent = "Offline";
     els.overlayTitle.textContent = formatNumber(state.score);
-    els.overlayDetail.textContent = "Signal route collapsed.";
+    els.overlayDetail.textContent = createShareCode(summary);
   }
 }
 
@@ -582,21 +592,39 @@ function formatNumber(value) {
 }
 
 function saveRunRecord(runState) {
+  const summary = createRunSummary(runState);
   runRecords.unshift({
-    status: runState.status,
-    score: Math.round(runState.score),
-    routeCode: runState.routeCode,
-    difficulty: runState.difficulty,
-    wave: runState.wave,
-    shards: runState.stats.shards,
-    gates: runState.stats.gates,
-    grazes: runState.stats.grazes,
-    breaks: runState.stats.hazardsBroken,
+    ...summary,
+    shareCode: createShareCode(summary),
     date: new Date().toISOString()
   });
   runRecords = runRecords.slice(0, 5);
   localStorage.setItem(recordsKey, JSON.stringify(runRecords));
   renderRecords(true);
+}
+
+function copyShareCode() {
+  if (state.status !== "won" && state.status !== "lost") {
+    return;
+  }
+
+  const code = createShareCode(createRunSummary(state));
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(code).then(
+      () => pushCopyEvent("Share copied"),
+      () => pushCopyEvent("Share ready")
+    );
+  } else {
+    pushCopyEvent("Share ready");
+  }
+}
+
+function pushCopyEvent(message) {
+  state.eventLog.unshift(message);
+  if (state.eventLog.length > 5) {
+    state.eventLog.length = 5;
+  }
+  syncHud(true);
 }
 
 function readRunRecords() {

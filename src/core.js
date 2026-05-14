@@ -111,6 +111,48 @@ export function createDailySeed(date = new Date()) {
   };
 }
 
+export function createRunSummary(state) {
+  return {
+    status: state.status,
+    routeCode: state.routeCode,
+    difficulty: state.difficulty,
+    score: Math.round(state.score),
+    wave: state.wave,
+    shield: Math.ceil(state.shield),
+    shards: state.stats.shards,
+    gates: state.stats.gates,
+    grazes: state.stats.grazes,
+    breaks: state.stats.hazardsBroken,
+    missions: state.stats.missions,
+    maxCombo: Number(state.maxCombo.toFixed(1))
+  };
+}
+
+export function createShareCode(summary) {
+  const result = summary.status === "won" ? "CLEAR" : "LOST";
+  const difficulty = {
+    soft: "SOFT",
+    standard: "STD",
+    eclipse: "ECL"
+  }[summary.difficulty] ?? "STD";
+
+  return [
+    "LD",
+    result,
+    summary.routeCode,
+    difficulty,
+    summary.score,
+    `W${summary.wave}`,
+    `H${summary.shield}`,
+    `S${summary.shards}`,
+    `G${summary.gates}`,
+    `R${summary.grazes}`,
+    `B${summary.breaks}`,
+    `M${summary.missions}`,
+    `X${summary.maxCombo}`
+  ].join("|");
+}
+
 export function createGameState(options = {}) {
   const difficulty = DIFFICULTIES[options.difficulty]
     ? options.difficulty

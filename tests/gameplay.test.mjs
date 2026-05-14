@@ -5,6 +5,8 @@ import {
   activatePulse,
   clamp,
   createDailySeed,
+  createRunSummary,
+  createShareCode,
   createMission,
   createGameState,
   distanceSq,
@@ -50,6 +52,46 @@ test("daily route uses the daily seed and code", () => {
   assert.equal(state.route, "daily");
   assert.equal(state.routeCode, daily.code);
   assert.equal(state.seed, daily.seed);
+});
+
+test("run summaries produce compact deterministic share codes", () => {
+  const state = createGameState({
+    difficulty: "eclipse",
+    route: "daily",
+    routeCode: "20260514",
+    seed: 7
+  });
+  state.status = "won";
+  state.score = 1234.4;
+  state.wave = 6;
+  state.shield = 87.2;
+  state.maxCombo = 2.34;
+  state.stats.shards = 12;
+  state.stats.gates = 3;
+  state.stats.grazes = 5;
+  state.stats.hazardsBroken = 2;
+  state.stats.missions = 4;
+
+  const summary = createRunSummary(state);
+
+  assert.deepEqual(summary, {
+    status: "won",
+    routeCode: "20260514",
+    difficulty: "eclipse",
+    score: 1234,
+    wave: 6,
+    shield: 88,
+    shards: 12,
+    gates: 3,
+    grazes: 5,
+    breaks: 2,
+    missions: 4,
+    maxCombo: 2.3
+  });
+  assert.equal(
+    createShareCode(summary),
+    "LD|CLEAR|20260514|ECL|1234|W6|H88|S12|G3|R5|B2|M4|X2.3"
+  );
 });
 
 test("collecting a shard increases score, combo, and overdrive", () => {
