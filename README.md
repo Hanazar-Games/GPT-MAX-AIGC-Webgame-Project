@@ -36,7 +36,9 @@ The static and HTTP verification scripts only need Python. The JavaScript checks
 
 ## Project Layout
 
+- `docs/DESIGN.md` captures the game design pillars and roadmap.
 - `index.html` hosts the game shell.
+- `ops/RUNBOOK.md` captures the local operating state and release flow.
 - `src/core.js` contains deterministic gameplay rules.
 - `src/game.js` handles rendering, input, audio, and HUD sync.
 - `src/styles.css` defines the responsive interface.
