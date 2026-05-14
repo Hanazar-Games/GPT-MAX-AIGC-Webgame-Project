@@ -4,6 +4,7 @@ import {
   ARENA,
   activatePulse,
   clamp,
+  createMission,
   createGameState,
   distanceSq,
   startState,
@@ -144,6 +145,33 @@ test("pulse clears only nearby static hazards", () => {
   assert.equal(state.entities.length, 1);
   assert.equal(state.entities[0].id, "far-static");
   assert.equal(state.overdrive, 0);
+});
+
+test("missions track stat progress and grant rewards", () => {
+  const state = playableState();
+  state.mission = createMission(0, state.wave, state.stats);
+  state.mission.target = 1;
+  state.entities.push({
+    id: "mission-shard",
+    type: "shard",
+    x: state.player.x,
+    y: state.player.y,
+    vx: 0,
+    vy: 0,
+    r: 12,
+    value: 10,
+    age: 0,
+    rotation: 0,
+    spin: 0,
+    color: "#e6b94f"
+  });
+
+  updateGame(state, {}, 0.016);
+
+  assert.equal(state.stats.missions, 1);
+  assert.equal(state.mission.index, 1);
+  assert.ok(state.score > 100);
+  assert.ok(state.overdrive >= 18);
 });
 
 test("the route is won when elapsed time reaches the goal", () => {

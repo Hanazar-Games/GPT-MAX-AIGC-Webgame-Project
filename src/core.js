@@ -32,6 +32,26 @@ export const DIFFICULTIES = Object.freeze({
 
 const ENTITY_LIMIT = 90;
 const PARTICLE_LIMIT = 160;
+const MISSION_DEFS = Object.freeze([
+  Object.freeze({
+    stat: "shards",
+    label: (target) => `Link ${target} shards`,
+    target: (index, wave) => 5 + Math.floor(index * 0.8) + Math.floor(wave * 0.5),
+    reward: 110
+  }),
+  Object.freeze({
+    stat: "gates",
+    label: (target) => `Cross ${target} gates`,
+    target: (index, wave) => 1 + Math.floor((index + wave) / 4),
+    reward: 160
+  }),
+  Object.freeze({
+    stat: "hazardsBroken",
+    label: (target) => `Break ${target} static`,
+    target: (index, wave) => 2 + Math.floor((index + wave) / 3),
+    reward: 140
+  })
+]);
 const DEFAULT_INPUT = Object.freeze({
   axisX: 0,
   axisY: 0,
@@ -68,7 +88,7 @@ export function createGameState(options = {}) {
     : "standard";
   const seed = options.seed ?? Math.floor(Math.random() * 4294967295);
 
-  return {
+  const state = {
     status: "ready",
     difficulty,
     seed,
@@ -105,9 +125,12 @@ export function createGameState(options = {}) {
       shards: 0,
       hazardsBroken: 0,
       gates: 0,
-      pulses: 0
+      pulses: 0,
+      missions: 0
     }
   };
+  state.mission = createMission(0, state.wave, state.stats);
+  return state;
 }
 
 export function startState(state) {
@@ -152,6 +175,7 @@ export function updateGame(state, input = DEFAULT_INPUT, dt = 0) {
   updateSpawns(state, step);
   updateEntities(state, step);
   resolveCollisions(state);
+  updateMission(state);
   updateParticles(state, step);
 
   if (state.elapsed >= state.goal && state.status === "playing") {
@@ -290,6 +314,20 @@ export function spawnGate(state) {
   };
   state.entities.push(gate);
   return gate;
+}
+
+export function createMission(index, wave, stats) {
+  const def = MISSION_DEFS[index % MISSION_DEFS.length];
+  const target = def.target(index, wave);
+  return {
+    index,
+    stat: def.stat,
+    label: def.label(target),
+    target,
+    progress: 0,
+    startValue: stats[def.stat] ?? 0,
+    reward: def.reward + Math.floor(index / MISSION_DEFS.length) * 35
+  };
 }
 
 function tickTimers(state, dt) {
@@ -486,6 +524,30 @@ function handleGateCollision(state, gate) {
     burst(state, player.x, player.y, "#2aa6a1", 18);
     pushEvent(state, "Gate crossed");
   }
+}
+
+function updateMission(state) {
+  const mission = state.mission;
+  if (!mission) {
+    return;
+  }
+
+  mission.progress = clamp(
+    (state.stats[mission.stat] ?? 0) - mission.startValue,
+    0,
+    mission.target
+  );
+
+  if (mission.progress < mission.target) {
+    return;
+  }
+
+  state.stats.missions += 1;
+  state.score += Math.round(mission.reward * state.combo);
+  state.overdrive = clamp(state.overdrive + 18, 0, 100);
+  state.shield = clamp(state.shield + 8, 0, 100);
+  pushEvent(state, "Objective complete");
+  state.mission = createMission(state.stats.missions, state.wave, state.stats);
 }
 
 function addCombo(state, amount) {

@@ -125,6 +125,7 @@ select {
 .hud-readout,
 .telemetry-grid > div,
 .meter-block,
+.mission-panel,
 .event-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -262,6 +263,15 @@ select {
   background: linear-gradient(90deg, var(--teal), var(--amber));
 }
 
+.meter.mission {
+  margin-top: 10px;
+}
+
+.meter.mission span {
+  width: 0%;
+  background: linear-gradient(90deg, var(--amber), var(--teal));
+}
+
 .telemetry-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -279,6 +289,17 @@ select {
 .event-panel {
   min-height: 154px;
   padding: 12px;
+}
+
+.mission-panel {
+  min-height: 104px;
+  padding: 12px;
+}
+
+.mission-panel > strong {
+  display: block;
+  min-height: 28px;
+  font-size: 1.05rem;
 }
 
 .event-panel ol {
@@ -314,7 +335,8 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .event-panel {
+  .event-panel,
+  .mission-panel {
     grid-column: 1 / -1;
   }
 }

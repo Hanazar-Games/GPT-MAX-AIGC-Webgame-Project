@@ -2,7 +2,7 @@
 
 `hanazarochikawa` baseline for the GPT-MAX-AIGC-Webgame-Project repository.
 
-Lumen Drift is a zero-dependency Canvas webgame about holding a signal route open for 90 seconds. It has keyboard, pointer, and touch input; score persistence; difficulty modes; deterministic gameplay logic; offline app-shell caching; and a GitHub Pages deployment workflow.
+Lumen Drift is a zero-dependency Canvas webgame about holding a signal route open for 90 seconds. It has keyboard, pointer, and touch input; score persistence; rotating objectives; difficulty modes; deterministic gameplay logic; offline app-shell caching; and a GitHub Pages deployment workflow.
 
 ## Run
 

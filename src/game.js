@@ -22,6 +22,9 @@ const els = {
   shieldMeterLabel: document.querySelector("#shield-meter-label"),
   overdriveMeter: document.querySelector("#overdrive-meter"),
   overdriveMeterLabel: document.querySelector("#overdrive-meter-label"),
+  missionTitle: document.querySelector("#mission-title"),
+  missionMeter: document.querySelector("#mission-meter"),
+  missionMeterLabel: document.querySelector("#mission-meter-label"),
   eventLog: document.querySelector("#event-log"),
   overlay: document.querySelector("#stage-overlay"),
   overlayKicker: document.querySelector("#overlay-kicker"),
@@ -228,6 +231,9 @@ function syncHud(force = false) {
   els.shieldMeterLabel.textContent = `${Math.ceil(state.shield)}%`;
   els.overdriveMeter.style.width = `${state.overdrive}%`;
   els.overdriveMeterLabel.textContent = `${Math.floor(state.overdrive)}%`;
+  els.missionTitle.textContent = state.mission.label;
+  els.missionMeter.style.width = `${(state.mission.progress / state.mission.target) * 100}%`;
+  els.missionMeterLabel.textContent = `${state.mission.progress}/${state.mission.target}`;
   els.pulse.disabled = state.overdrive < 100 || state.status !== "playing";
   els.pause.disabled = state.status === "ready" || state.status === "lost" || state.status === "won";
   els.start.disabled = state.status === "playing";

@@ -59,7 +59,7 @@ def check_html_assets() -> None:
 
 
 def check_js_imports() -> None:
-    import_pattern = re.compile(r"from\\s+[\"'](?P<path>\\./[^\"']+)[\"']")
+    import_pattern = re.compile(r"from\s+[\"'](?P<path>\./[^\"']+)[\"']")
     for js_path in JS_PATHS:
         text = js_path.read_text(encoding="utf-8")
         for match in import_pattern.finditer(text):
@@ -80,15 +80,14 @@ def check_required_game_ids() -> None:
         selector = f"#{element_id}"
         if selector in game or element_id in ("game-canvas",):
             continue
-        if element_id.startswith(("score", "shield", "time", "wave")):
-            fail(f"HUD id is not wired in game.js: {element_id}")
+        fail(f"DOM id is not wired in game.js: {element_id}")
 
 
 def check_css_guardrails() -> None:
     css = CSS_PATH.read_text(encoding="utf-8")
-    if re.search(r"letter-spacing\\s*:\\s*-", css):
+    if re.search(r"letter-spacing\s*:\s*-", css):
         fail("negative letter spacing is not allowed")
-    if re.search(r"font-size\\s*:\\s*[^;]*(vw|vh|vmin|vmax)", css):
+    if re.search(r"font-size\s*:\s*[^;]*(vw|vh|vmin|vmax)", css):
         fail("viewport-scaled font sizes are not allowed")
 
 
