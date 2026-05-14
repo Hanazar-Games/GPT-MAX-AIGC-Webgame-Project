@@ -19,6 +19,8 @@ const els = {
   combo: document.querySelector("#combo-value"),
   best: document.querySelector("#best-value"),
   shards: document.querySelector("#shards-value"),
+  gates: document.querySelector("#gates-value"),
+  grazes: document.querySelector("#grazes-value"),
   breaks: document.querySelector("#breaks-value"),
   shieldMeter: document.querySelector("#shield-meter"),
   shieldMeterLabel: document.querySelector("#shield-meter-label"),
@@ -246,6 +248,8 @@ function syncHud(force = false) {
   els.combo.textContent = `${state.combo.toFixed(1)}x`;
   els.best.textContent = formatNumber(state.best);
   els.shards.textContent = String(state.stats.shards);
+  els.gates.textContent = String(state.stats.gates);
+  els.grazes.textContent = String(state.stats.grazes);
   els.breaks.textContent = String(state.stats.hazardsBroken);
   els.shieldMeter.style.width = `${state.shield}%`;
   els.shieldMeterLabel.textContent = `${Math.ceil(state.shield)}%`;
@@ -392,8 +396,8 @@ function drawStatic(entity) {
   ctx.save();
   ctx.translate(entity.x, entity.y);
   ctx.rotate(entity.rotation);
-  ctx.strokeStyle = "#e05f3f";
-  ctx.fillStyle = "rgba(224, 95, 63, 0.2)";
+  ctx.strokeStyle = entity.grazed ? "#e6b94f" : "#e05f3f";
+  ctx.fillStyle = entity.grazed ? "rgba(230, 185, 79, 0.16)" : "rgba(224, 95, 63, 0.2)";
   ctx.lineWidth = 3;
   ctx.beginPath();
   for (let index = 0; index < 8; index += 1) {

@@ -103,6 +103,35 @@ test("static damage lowers shield when the player is not dashing", () => {
   assert.equal(state.combo, 1);
 });
 
+test("near misses on static hazards grant graze rewards once", () => {
+  const state = playableState();
+  state.entities.push({
+    id: "graze-test",
+    type: "static",
+    x: state.player.x + state.player.r + 30,
+    y: state.player.y,
+    vx: 0,
+    vy: 0,
+    r: 20,
+    damage: 20,
+    grazed: false,
+    age: 0,
+    rotation: 0,
+    spin: 0,
+    color: "#e05f3f"
+  });
+
+  updateGame(state, {}, 0.016);
+  const scoreAfterGraze = state.score;
+  updateGame(state, {}, 0.016);
+
+  assert.equal(state.entities.length, 1);
+  assert.equal(state.stats.grazes, 1);
+  assert.ok(scoreAfterGraze > 0);
+  assert.equal(state.score, scoreAfterGraze);
+  assert.equal(state.shield, 100);
+});
+
 test("dash breaks static hazards instead of damaging shield", () => {
   const state = playableState();
   state.entities.push({

@@ -32,12 +32,19 @@ export const DIFFICULTIES = Object.freeze({
 
 const ENTITY_LIMIT = 90;
 const PARTICLE_LIMIT = 160;
+const GRAZE_MARGIN = 34;
 const MISSION_DEFS = Object.freeze([
   Object.freeze({
     stat: "shards",
     label: (target) => `Link ${target} shards`,
     target: (index, wave) => 5 + Math.floor(index * 0.8) + Math.floor(wave * 0.5),
     reward: 110
+  }),
+  Object.freeze({
+    stat: "grazes",
+    label: (target) => `Graze ${target} static`,
+    target: (index, wave) => 4 + Math.floor(index * 0.7) + Math.floor(wave * 0.4),
+    reward: 125
   }),
   Object.freeze({
     stat: "gates",
@@ -152,6 +159,7 @@ export function createGameState(options = {}) {
       shards: 0,
       hazardsBroken: 0,
       gates: 0,
+      grazes: 0,
       pulses: 0,
       missions: 0
     }
@@ -295,6 +303,7 @@ export function spawnEntity(state, forcedType) {
       ...base,
       r: 18 + rng() * 12,
       damage: 16 + state.wave * 1.8,
+      grazed: false,
       color: "#e05f3f"
     };
   } else if (type === "charge") {
@@ -472,7 +481,9 @@ function resolveCollisions(state) {
     }
 
     const hitRadius = state.player.r + entity.r;
-    if (distanceSq(state.player, entity) > hitRadius * hitRadius) {
+    const proximity = distanceSq(state.player, entity);
+    if (proximity > hitRadius * hitRadius) {
+      maybeGrazeStatic(state, entity, proximity, hitRadius + GRAZE_MARGIN);
       kept.push(entity);
       continue;
     }
@@ -551,6 +562,24 @@ function handleGateCollision(state, gate) {
     burst(state, player.x, player.y, "#2aa6a1", 18);
     pushEvent(state, "Gate crossed");
   }
+}
+
+function maybeGrazeStatic(state, entity, proximity, grazeRadius) {
+  if (
+    entity.type !== "static" ||
+    entity.grazed ||
+    proximity > grazeRadius * grazeRadius
+  ) {
+    return;
+  }
+
+  entity.grazed = true;
+  state.stats.grazes += 1;
+  state.score += Math.round((8 + state.wave) * state.combo);
+  state.overdrive = clamp(state.overdrive + 4, 0, 100);
+  addCombo(state, 0.08);
+  burst(state, state.player.x, state.player.y, "#f4efe5", 5);
+  pushEvent(state, "Static grazed");
 }
 
 function updateMission(state) {
