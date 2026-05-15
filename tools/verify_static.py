@@ -107,6 +107,22 @@ def check_service_worker_cache() -> None:
         fail(f"service worker cache is missing: {', '.join(missing)}")
 
 
+def check_result_deep_link_wiring() -> None:
+    html = HTML_PATH.read_text(encoding="utf-8")
+    game = (ROOT / "src" / "game.js").read_text(encoding="utf-8")
+    required_snippets = (
+        'id="link-button"',
+        'const resultParam = "result"',
+        "createResultUrl",
+        "syncResultUrl",
+        "URLSearchParams(location.search)",
+    )
+
+    for snippet in required_snippets:
+        if snippet not in html and snippet not in game:
+            fail(f"result deep-link wiring is missing: {snippet}")
+
+
 def main() -> None:
     check_json()
     check_html_assets()
@@ -114,6 +130,7 @@ def main() -> None:
     check_required_game_ids()
     check_css_guardrails()
     check_service_worker_cache()
+    check_result_deep_link_wiring()
     print("verify_static: OK")
 
 

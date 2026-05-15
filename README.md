@@ -14,7 +14,7 @@ Open `http://localhost:4173`.
 
 Daily routes and difficulty can be opened directly with query params, for example `http://localhost:4173/?route=daily&mode=eclipse`.
 
-Completed and failed routes emit compact result codes. Paste a result code into the Result Code panel to inspect route, difficulty, score, wave, shield, and max combo.
+Completed and failed routes emit compact result codes. Paste a result code into the Result Code panel to inspect route, difficulty, score, wave, shield, and max combo. The Link action creates a URL with a `result` query parameter for direct result inspection.
 
 If Node/npm is installed, `npm start` runs the same static server command.
 

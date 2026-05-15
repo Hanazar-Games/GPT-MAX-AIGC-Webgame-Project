@@ -12,6 +12,7 @@ import {
 
 const storagePrefix = "lumen-drift-best";
 const recordsKey = "lumen-drift-records";
+const resultParam = "result";
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 const els = {
@@ -48,6 +49,7 @@ const els = {
   pulse: document.querySelector("#pulse-button"),
   copy: document.querySelector("#copy-button"),
   decode: document.querySelector("#decode-button"),
+  link: document.querySelector("#link-button"),
   reset: document.querySelector("#reset-button")
 };
 
@@ -101,6 +103,10 @@ els.copy.addEventListener("click", () => {
 
 els.decode.addEventListener("click", () => {
   decodeShareCode();
+});
+
+els.link.addEventListener("click", () => {
+  copyResultLink();
 });
 
 els.shareInput.addEventListener("keydown", (event) => {
@@ -200,6 +206,7 @@ function applyInitialSettings() {
   const params = new URLSearchParams(location.search);
   setSelectValue(els.difficulty, params.get("mode"));
   setSelectValue(els.routeSelect, params.get("route"));
+  loadShareCode(params.get(resultParam), { syncUrl: false });
 }
 
 function setSelectValue(select, value) {
@@ -228,9 +235,7 @@ function syncUrlSettings() {
     params.set("route", els.routeSelect.value);
   }
 
-  const query = params.toString();
-  const nextUrl = `${location.pathname}${query ? `?${query}` : ""}${location.hash}`;
-  history.replaceState(null, "", nextUrl);
+  replaceUrlParams(params);
 }
 
 function frame(now) {
@@ -276,10 +281,12 @@ function collectInput() {
 function handleStatusChange() {
   if (state.status === "won") {
     saveRunRecord(state);
+    loadShareCode(createShareCode(createRunSummary(state)), { syncUrl: false });
     playTone(523, 0.16, "triangle");
     setTimeout(() => playTone(659, 0.18, "triangle"), 90);
   } else if (state.status === "lost") {
     saveRunRecord(state);
+    loadShareCode(createShareCode(createRunSummary(state)), { syncUrl: false });
     playTone(130, 0.22, "sawtooth");
   }
 }
@@ -623,6 +630,7 @@ function copyShareCode() {
   }
 
   const code = createShareCode(createRunSummary(state));
+  loadShareCode(code, { syncUrl: false });
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(code).then(
       () => pushCopyEvent("Share copied"),
@@ -633,13 +641,58 @@ function copyShareCode() {
   }
 }
 
-function decodeShareCode() {
-  const summary = parseShareCode(els.shareInput.value);
+function decodeShareCode(options = {}) {
+  return loadShareCode(els.shareInput.value, {
+    syncUrl: options.syncUrl ?? true
+  });
+}
+
+function copyResultLink() {
+  const inputCode = els.shareInput.value.trim();
+  const summary =
+    (inputCode ? parseShareCode(inputCode) : null) ??
+    (!inputCode && (state.status === "won" || state.status === "lost")
+      ? createRunSummary(state)
+      : null);
   if (!summary) {
     els.shareResult.textContent = "Invalid result code";
     return;
   }
 
+  const code = createShareCode(summary);
+  loadShareCode(code, { syncUrl: true });
+  const url = createResultUrl(code);
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(
+      () => pushCopyEvent("Link copied"),
+      () => pushCopyEvent("Link ready")
+    );
+  } else {
+    pushCopyEvent("Link ready");
+  }
+}
+
+function loadShareCode(code, options = {}) {
+  if (!code) {
+    return false;
+  }
+
+  const summary = parseShareCode(code);
+  if (!summary) {
+    els.shareResult.textContent = "Invalid result code";
+    return false;
+  }
+
+  const canonicalCode = createShareCode(summary);
+  els.shareInput.value = canonicalCode;
+  renderShareSummary(summary);
+  if (options.syncUrl) {
+    syncResultUrl(canonicalCode);
+  }
+  return true;
+}
+
+function renderShareSummary(summary) {
   const result = summary.status === "won" ? "Clear" : "Lost";
   const route = summary.routeCode === "RUN" ? "Run" : summary.routeCode;
   els.shareResult.textContent = [
@@ -649,6 +702,24 @@ function decodeShareCode() {
     `H${summary.shield}`,
     `X${summary.maxCombo}`
   ].join(" / ");
+}
+
+function syncResultUrl(code) {
+  const params = new URLSearchParams(location.search);
+  params.set(resultParam, code);
+  replaceUrlParams(params);
+}
+
+function createResultUrl(code) {
+  const url = new URL(location.href);
+  url.searchParams.set(resultParam, code);
+  return url.toString();
+}
+
+function replaceUrlParams(params) {
+  const query = params.toString();
+  const nextUrl = `${location.pathname}${query ? `?${query}` : ""}${location.hash}`;
+  history.replaceState(null, "", nextUrl);
 }
 
 function pushCopyEvent(message) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "lumen-drift-v7";
+const CACHE_NAME = "lumen-drift-v8";
 const APP_SHELL = [
   "./",
   "index.html",
