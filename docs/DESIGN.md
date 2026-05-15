@@ -15,6 +15,7 @@ Lumen Drift is a compact survival arcade game where the player keeps a signal ro
 - Copy a compact result code after each completed or failed route.
 - Decode a compact result code to inspect another run.
 - Share a result deep link for direct run inspection.
+- Switch to a low-intensity visual mode without changing scoring or route logic.
 
 ## Modes
 
@@ -39,10 +40,10 @@ Score is intentionally layered:
 - Use dense telemetry, because this is an arcade tool the player repeatedly scans.
 - Avoid instructional copy during play; feedback should come from HUD state, color, and the signal log.
 - Preserve keyboard, pointer, and touch support.
+- Treat calm visuals as a first-class accessibility option, not a separate difficulty.
 
 ## Near-Term Roadmap
 
-- Add optional low-intensity visual mode.
 - Add a richer end-of-run breakdown.
 - Add browser-level visual regression checks once a reliable browser runner is available in the environment.
 - Push to GitHub Pages once GitHub credentials are available on this machine.

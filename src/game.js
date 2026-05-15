@@ -13,6 +13,7 @@ import {
 const storagePrefix = "lumen-drift-best";
 const recordsKey = "lumen-drift-records";
 const resultParam = "result";
+const visualParam = "visual";
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 const els = {
@@ -44,6 +45,7 @@ const els = {
   overlayDetail: document.querySelector("#overlay-detail"),
   difficulty: document.querySelector("#difficulty-select"),
   routeSelect: document.querySelector("#route-select"),
+  visual: document.querySelector("#visual-select"),
   start: document.querySelector("#start-button"),
   pause: document.querySelector("#pause-button"),
   pulse: document.querySelector("#pulse-button"),
@@ -136,6 +138,12 @@ els.routeSelect.addEventListener("change", () => {
   }
 });
 
+els.visual.addEventListener("change", () => {
+  syncVisualMode();
+  syncUrlSettings();
+  drawScene(performance.now() / 1000);
+});
+
 window.addEventListener("keydown", (event) => {
   if (event.repeat) {
     return;
@@ -206,6 +214,11 @@ function applyInitialSettings() {
   const params = new URLSearchParams(location.search);
   setSelectValue(els.difficulty, params.get("mode"));
   setSelectValue(els.routeSelect, params.get("route"));
+  setSelectValue(els.visual, params.get(visualParam));
+  if (!params.has(visualParam) && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+    els.visual.value = "calm";
+  }
+  syncVisualMode();
   loadShareCode(params.get(resultParam), { syncUrl: false });
 }
 
@@ -235,7 +248,21 @@ function syncUrlSettings() {
     params.set("route", els.routeSelect.value);
   }
 
+  if (els.visual.value === "standard") {
+    params.delete(visualParam);
+  } else {
+    params.set(visualParam, els.visual.value);
+  }
+
   replaceUrlParams(params);
+}
+
+function syncVisualMode() {
+  document.documentElement.dataset.visual = els.visual.value;
+}
+
+function isCalmVisuals() {
+  return els.visual.value === "calm";
 }
 
 function frame(now) {
@@ -380,30 +407,34 @@ function bestKey(difficulty, routeCode) {
 }
 
 function drawScene(time) {
-  const shake = state.shake > 0 ? state.shake * 8 : 0;
+  const calm = isCalmVisuals();
+  const shake = !calm && state.shake > 0 ? state.shake * 8 : 0;
   const offsetX = (Math.sin(time * 46) + Math.sin(time * 17)) * shake;
   const offsetY = (Math.cos(time * 39) + Math.sin(time * 13)) * shake;
 
   ctx.save();
   ctx.translate(offsetX, offsetY);
-  drawBackground(time);
-  drawEntities(time);
-  drawParticles();
-  drawPlayer(time);
-  if (state.flash > 0) {
+  drawBackground(time, calm);
+  drawEntities(time, calm);
+  if (!calm) {
+    drawParticles();
+  }
+  drawPlayer(time, calm);
+  if (!calm && state.flash > 0) {
     ctx.fillStyle = `rgba(244, 239, 229, ${state.flash * 0.18})`;
     ctx.fillRect(0, 0, ARENA.width, ARENA.height);
   }
   ctx.restore();
 }
 
-function drawBackground(time) {
+function drawBackground(time, calm) {
   ctx.fillStyle = "#11110f";
   ctx.fillRect(-20, -20, ARENA.width + 40, ARENA.height + 40);
 
   ctx.fillStyle = "#181713";
+  const scroll = calm ? 0 : (time * 18) % 80;
   for (let y = -80; y < ARENA.height + 80; y += 80) {
-    ctx.fillRect(0, y + ((time * 18) % 80), ARENA.width, 1);
+    ctx.fillRect(0, y + scroll, ARENA.width, 1);
   }
 
   ctx.strokeStyle = "rgba(244, 239, 229, 0.08)";
@@ -411,7 +442,7 @@ function drawBackground(time) {
   for (let x = 80; x < ARENA.width; x += 80) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
-    ctx.lineTo(x + Math.sin(time + x) * 8, ARENA.height);
+    ctx.lineTo(x + (calm ? 0 : Math.sin(time + x) * 8), ARENA.height);
     ctx.stroke();
   }
 
@@ -439,14 +470,14 @@ function drawBackground(time) {
   ctx.stroke();
 }
 
-function drawEntities(time) {
+function drawEntities(time, calm) {
   for (const entity of state.entities) {
     if (entity.type === "gate") {
-      drawGate(entity, time);
+      drawGate(entity, time, calm);
     } else if (entity.type === "static") {
       drawStatic(entity);
     } else if (entity.type === "charge") {
-      drawCharge(entity, time);
+      drawCharge(entity, time, calm);
     } else {
       drawShard(entity);
     }
@@ -496,14 +527,14 @@ function drawStatic(entity) {
   ctx.restore();
 }
 
-function drawCharge(entity, time) {
+function drawCharge(entity, time, calm) {
   ctx.save();
   ctx.translate(entity.x, entity.y);
   ctx.strokeStyle = "#8fbf5b";
   ctx.fillStyle = "rgba(143, 191, 91, 0.18)";
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.arc(0, 0, entity.r + Math.sin(time * 8 + entity.age) * 2, 0, Math.PI * 2);
+  ctx.arc(0, 0, entity.r + (calm ? 0 : Math.sin(time * 8 + entity.age) * 2), 0, Math.PI * 2);
   ctx.stroke();
   ctx.beginPath();
   ctx.arc(0, 0, entity.r * 0.45, 0, Math.PI * 2);
@@ -511,10 +542,10 @@ function drawCharge(entity, time) {
   ctx.restore();
 }
 
-function drawGate(gate, time) {
+function drawGate(gate, time, calm) {
   const left = gate.x - gate.w * 0.5;
   const right = gate.x + gate.w * 0.5;
-  const pulse = 0.4 + Math.sin(time * 5 + gate.age) * 0.18;
+  const pulse = calm ? 0.44 : 0.4 + Math.sin(time * 5 + gate.age) * 0.18;
 
   ctx.save();
   ctx.strokeStyle = gate.scored ? "rgba(143, 191, 91, 0.72)" : `rgba(42, 166, 161, ${pulse})`;
@@ -541,7 +572,7 @@ function drawParticles() {
   }
 }
 
-function drawPlayer(time) {
+function drawPlayer(time, calm) {
   const player = state.player;
   const dash = state.dashTimer > 0;
 
@@ -563,12 +594,14 @@ function drawPlayer(time) {
 
   ctx.fillStyle = "#2aa6a1";
   ctx.beginPath();
-  ctx.arc(-3, 0, 5 + Math.sin(time * 9) * 1.2, 0, Math.PI * 2);
+  ctx.arc(-3, 0, calm ? 5 : 5 + Math.sin(time * 9) * 1.2, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.strokeStyle = dash ? "rgba(230, 185, 79, 0.62)" : "rgba(42, 166, 161, 0.32)";
+  ctx.strokeStyle = dash
+    ? `rgba(230, 185, 79, ${calm ? 0.42 : 0.62})`
+    : `rgba(42, 166, 161, ${calm ? 0.22 : 0.32})`;
   ctx.beginPath();
-  ctx.arc(0, 0, dash ? 31 : 25, 0, Math.PI * 2);
+  ctx.arc(0, 0, dash ? (calm ? 28 : 31) : 25, 0, Math.PI * 2);
   ctx.stroke();
   ctx.restore();
 }
