@@ -1,4 +1,4 @@
-const CACHE_NAME = "lumen-drift-v9";
+const CACHE_NAME = "lumen-drift-v10";
 const APP_SHELL = [
   "./",
   "index.html",
@@ -6,6 +6,7 @@ const APP_SHELL = [
   "assets/favicon.svg",
   "src/core.js",
   "src/game.js",
+  "src/report.js",
   "src/styles.css"
 ];
 

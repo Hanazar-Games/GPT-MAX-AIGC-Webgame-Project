@@ -137,6 +137,7 @@ input {
 .telemetry-grid > div,
 .meter-block,
 .mission-panel,
+.report-panel,
 .record-panel,
 .share-panel,
 .event-panel {
@@ -300,6 +301,7 @@ input {
 }
 
 .event-panel,
+.report-panel,
 .record-panel,
 .share-panel {
   min-height: 154px;
@@ -318,6 +320,7 @@ input {
 }
 
 .event-panel ol,
+.report-panel ol,
 .record-panel ol {
   list-style: none;
   display: grid;
@@ -327,6 +330,7 @@ input {
 }
 
 .event-panel li,
+.report-panel li,
 .record-panel li {
   min-height: 26px;
   padding: 5px 8px;
@@ -339,6 +343,22 @@ input {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 3px 8px;
+}
+
+.report-panel li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.report-panel .report-total {
+  border-left-color: var(--amber);
+  background: rgba(230, 185, 79, 0.1);
+}
+
+.report-panel strong {
+  color: var(--amber);
 }
 
 .record-panel strong {
@@ -388,6 +408,7 @@ input {
   }
 
   .event-panel,
+  .report-panel,
   .record-panel,
   .share-panel,
   .mission-panel {

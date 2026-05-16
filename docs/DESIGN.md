@@ -12,6 +12,7 @@ Lumen Drift is a compact survival arcade game where the player keeps a signal ro
 - Graze static hazards for high-risk overdrive and combo gain.
 - Pulse to clear nearby static hazards when overdrive is full.
 - Complete rotating objectives for route rewards.
+- Read the run report to scan the current score pressure without leaving the play surface.
 - Copy a compact result code after each completed or failed route.
 - Decode a compact result code to inspect another run.
 - Share a result deep link for direct run inspection.
@@ -33,6 +34,8 @@ Score is intentionally layered:
 - graze scoring rewards mastery;
 - objectives create short-term routing pressure;
 - the final clear bonus rewards survival and shield retention.
+
+The Run Report should stay compact and readable during play, then reuse any stored breakdown data when a route record provides it.
 
 ## Interface Principles
 

@@ -2,7 +2,7 @@
 
 `hanazarochikawa` baseline for the GPT-MAX-AIGC-Webgame-Project repository.
 
-Lumen Drift is a zero-dependency Canvas webgame about holding a signal route open for 90 seconds. It has keyboard, pointer, and touch input; score and run-history persistence; daily seeded routes; compact share-code copy and decode; rotating objectives; near-miss graze scoring; difficulty modes; deterministic gameplay logic; offline app-shell caching; and a GitHub Pages deployment workflow.
+Lumen Drift is a zero-dependency Canvas webgame about holding a signal route open for 90 seconds. It has keyboard, pointer, and touch input; score and run-history persistence; daily seeded routes; compact share-code copy and decode; rotating objectives; near-miss graze scoring; a live run report; difficulty modes; deterministic gameplay logic; offline app-shell caching; and a GitHub Pages deployment workflow.
 
 ## Run
 
@@ -17,6 +17,8 @@ Daily routes and difficulty can be opened directly with query params, for exampl
 Use `?visual=calm` or the Visuals control to reduce screen shake, flash, background motion, and particle intensity without changing gameplay.
 
 Completed and failed routes emit compact result codes. Paste a result code into the Result Code panel to inspect route, difficulty, score, wave, shield, and max combo. The Link action creates a URL with a `result` query parameter for direct result inspection.
+
+The Run Report panel mirrors the current route score, shard links, gate crossings, grazes, and breaks so a run can be scanned without hunting across the HUD.
 
 If Node/npm is installed, `npm start` runs the same static server command.
 

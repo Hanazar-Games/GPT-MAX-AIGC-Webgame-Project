@@ -13,7 +13,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HTML_PATH = ROOT / "index.html"
 JSON_PATHS = (ROOT / "package.json", ROOT / "manifest.webmanifest")
-JS_PATHS = (ROOT / "src" / "core.js", ROOT / "src" / "game.js")
+JS_PATHS = (
+    ROOT / "src" / "core.js",
+    ROOT / "src" / "game.js",
+    ROOT / "src" / "report.js",
+)
 CSS_PATH = ROOT / "src" / "styles.css"
 SERVICE_WORKER_PATH = ROOT / "sw.js"
 
@@ -73,12 +77,12 @@ def check_js_imports() -> None:
 
 def check_required_game_ids() -> None:
     html = HTML_PATH.read_text(encoding="utf-8")
-    game = (ROOT / "src" / "game.js").read_text(encoding="utf-8")
+    js_bundle = "\n".join(path.read_text(encoding="utf-8") for path in JS_PATHS)
     ids = re.findall(r'id="([^"]+)"', html)
 
     for element_id in ids:
         selector = f"#{element_id}"
-        if selector in game or element_id in ("game-canvas",):
+        if selector in js_bundle or element_id in ("game-canvas",):
             continue
         fail(f"DOM id is not wired in game.js: {element_id}")
 
@@ -100,6 +104,7 @@ def check_service_worker_cache() -> None:
         "assets/favicon.svg",
         "src/core.js",
         "src/game.js",
+        "src/report.js",
         "src/styles.css",
     }
     missing = sorted(required_assets - cached_assets)
